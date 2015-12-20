@@ -1,18 +1,22 @@
 #include <SoftwareSerial.h>
 #include <esp8266_AT.h>
 
-int redPin = 11;
-int greenPin = 10;
-int bluePin = 9;
+//pin numbers of helper debug software serial
+#define rx_pin 2
+#define tx_pin 3
 
-SoftwareSerial mySerial(2, 3); // RX, TX
-Esp8266AT esp8266AT(&Serial, &mySerial);
+// replace value with access point name
+#define ap_name "write access point name here";
+
+// replace value with access point password
+#define ap_pass "write access point password here";
+
+
+SoftwareSerial debugSerial(rx_pin, tx_pin);
+Esp8266AT esp8266AT(&Serial, &debugSerial);
 
 void setup() {
-  pinMode(redPin, OUTPUT);
-  pinMode(greenPin, OUTPUT);
-  pinMode(bluePin, OUTPUT);  
-  
+
   // Open serial communications and wait for port to open:
   Serial.begin(115200);
   while (!Serial) {
@@ -21,20 +25,24 @@ void setup() {
   Serial.setTimeout(8000);
 
   // set the data rate for the SoftwareSerial port
-  mySerial.begin(115200);
-  mySerial.setTimeout(8000);
+  debugSerial.begin(115200);
+  debugSerial.setTimeout(8000);
 }
 
-int flag = 0;
+boolean connected = false;
 
 void loop() {
-    if (!esp8266AT.setup("nord", "asusn18urouter")) {
-        mySerial.println("Connection failed, please reset");
-        while (1);
+    if (!connected) {
+        if (!esp8266AT.setup(ap_name, ap_pass)) {
+            debugSerial.println("Connection failed, please reset");
+            while (1);
+        } else {
+            connected = true;
+        }
     }
 
     if (!esp8266AT.get("192.168.1.46", 1337, "GET / HTTP/1.0\r\nHost: localhost\r\n\r\n", "HTTP/1.1 200 OK")) {
-        mySerial.println("Last GET was failed");
+        debugSerial.println("Last GET was failed");
     }
 
    delay(5000);
