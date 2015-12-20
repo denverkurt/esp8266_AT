@@ -108,20 +108,11 @@ boolean Esp8266AT::_request(String ip, int port, String message, String expected
 
 void Esp8266AT::_finishLastCommand() {
     //Just for debugging purposes to read whole response
-    delay(20);
 
-    if (this->_dbgStream) {
-        while (this->_stream->available()) {
-            this->_dbgStream->write(this->_stream->read());
-            delay(20);
-        }
-    } else {
-        while (this->_stream->available()) {
-            this->_stream->read();
-            delay(20);
+    while (this->_stream->available()) {
+        byte data = this->_stream->read();
+        if (this->_dbgStream) {
+            this->_dbgStream->write(data);
         }
     }
-
-    //delay between commands to allow chip to finish last command
-    delay(DELAY_BETWEEN_COMMANDS);
 }

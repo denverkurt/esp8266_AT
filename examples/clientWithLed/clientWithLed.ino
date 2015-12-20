@@ -50,20 +50,21 @@ void loop() {
 
         if (!esp8266AT.setup(ap_name, ap_pass)) {
             red();
-            while (1);
         } else {
             green();
             connected = true;
         }
     }
 
-    blue();
+    if (connected) {
+        blue();
 
-    //please replace ip, port request and response messages appropriately
-    if (!esp8266AT.post("192.168.1.46", 1337, "/api/get", "application/x-www-form-urlencoded","key=value", 200)) {
-        red();
-    } else {
-        green();
+        //please replace ip, port request and response messages appropriately
+        if (!esp8266AT.post("192.168.1.46", 1337, "/", "application/x-www-form-urlencoded","key=value", 200)) {
+            red();
+        } else {
+            green();
+        }
     }
 
    delay(5000);

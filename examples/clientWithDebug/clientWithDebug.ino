@@ -44,17 +44,18 @@ boolean connected = false;
 void loop() {
     if (!connected) {
         if (!esp8266AT.setup(ap_name, ap_pass)) {
-            debugSerial.println("Connection failed, please reset");
-            while (1);
+            debugSerial.println("Connection failed, will repeat in 5 sec");
         } else {
             connected = true;
         }
     }
 
-    //please replace ip, port request and ressponse messages appropriately
-    if (!esp8266AT.post("192.168.1.46", 1337, "/api/get", "application/x-www-form-urlencoded","key=value", 200)) {
-        debugSerial.println("Last GET was failed");
+    if (connected) {
+        //please replace ip, port request and ressponse messages appropriately
+        if (!esp8266AT.post("192.168.1.46", 1337, "/", "application/x-www-form-urlencoded","key=value", 200)) {
+            debugSerial.println("Last GET was failed");
+        }
     }
 
-   delay(5000);
+    delay(5000);
 }

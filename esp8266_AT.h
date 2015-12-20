@@ -34,8 +34,6 @@
 //AT OK response
 #define AT_RESPONSE_OK "OK"
 
-//1 second delay between commands
-#define DELAY_BETWEEN_COMMANDS 1000
 
 //Some HTTP response codes
 #define HTTP_200_OK "HTTP/1.1 200 OK"
