@@ -60,7 +60,7 @@ void loop() {
     blue();
 
     //please replace ip, port request and response messages appropriately
-    if (!esp8266AT.get("192.168.1.46", 1337, "GET / HTTP/1.0\r\nHost: 192.168.1.46:1337\r\n\r\n", "HTTP/1.1 200 OK")) {
+    if (!esp8266AT.post("192.168.1.46", 1337, "/api/get", "application/x-www-form-urlencoded","key=value", 200)) {
         red();
     } else {
         green();

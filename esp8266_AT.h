@@ -23,7 +23,7 @@
 #define MULTI_CONNECTION_MODE "AT+CIPMUX=1"
 
 //tcp connection start: AT+CIPSTART="TCP","8.8.8.8",80
-#define TCP_START_CONNECTION "AT+CIPSTART="
+#define TCP_START_CONNECTION "AT+CIPSTART=\"TCP\""
 //start sending message over tcp
 #define TCP_SEND_MESSAGE "AT+CIPSEND="
 //prompt message after which we can start sending our request
@@ -34,9 +34,12 @@
 //AT OK response
 #define AT_RESPONSE_OK "OK"
 
+//1 second delay between commands
+#define DELAY_BETWEEN_COMMANDS 1000
 
-#define DELAY_BETWEEN_COMMANDS 1000 //1 second delay between commands
-
+//Some HTTP response codes
+#define HTTP_200_OK "HTTP/1.1 200 OK"
+#define HTTP_201_CREATED "HTTP/1.1 201 CREATED"
 
 #include "Arduino.h"
 #include <Stream.h>
@@ -58,10 +61,12 @@ public:
     boolean setup(String accessPoint, String password);
 
     //HTTP methods emulation
-    boolean get(String ip, int port, String path, String expectedResult);
+    boolean get(String ip, int port, String path);
+    boolean post(String ip, int port, String path, String contentType, String payload, int expectedResponseCode);
 private:
     Stream *_stream;
     Stream *_dbgStream;
+    boolean _request(String ip, int port, String message, String expectedResponse);
     void _finishLastCommand();
 };
 
