@@ -6,10 +6,10 @@
 #define tx_pin 3
 
 // replace value with access point name
-#define ap_name "write access point name here";
+#define ap_name "write access point name here"
 
 // replace value with access point password
-#define ap_pass "write access point password here";
+#define ap_pass "write access point password here"
 
 
 SoftwareSerial debugSerial(rx_pin, tx_pin);
