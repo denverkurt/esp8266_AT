@@ -54,7 +54,7 @@ public:
      * dbgStream - serial port for debug purposes
      */
     Esp8266AT(Stream *stream, Stream *dbgStream = NULL);
-    boolean executeCommandAndWaitForResult(String command, String expectedResult);
+    boolean executeCommandAndWaitForResult(String command, String expectedResult, boolean prln);
     void executeCommandAndIgnoreResult(String command);
     boolean setup(String accessPoint, String password);
 
