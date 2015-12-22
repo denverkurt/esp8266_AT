@@ -43,6 +43,10 @@ boolean connected = false;
 
 void loop() {
     if (!connected) {
+
+        //to allow wifi to start correctly
+        delay(5000);
+
         if (!esp8266AT.setup(ap_name, ap_pass)) {
             debugSerial.println("Connection failed, will repeat in 5 sec");
         } else {
@@ -55,7 +59,7 @@ void loop() {
         if (!esp8266AT.post("192.168.1.46", 1337, "/", "application/x-www-form-urlencoded","key=value", 200)) {
             debugSerial.println("Last GET was failed");
         }
-    }
 
-    delay(5000);
+        delay(5000);
+    }
 }

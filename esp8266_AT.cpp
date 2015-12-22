@@ -8,6 +8,12 @@
 #include "Arduino.h"
 #include <Esp8266_AT.h>
 #include <Stream.h>
+#include <string.h>
+
+Esp8266AT::Esp8266AT(Stream *stream) {
+    this->_stream = stream;
+    this->_dbgStream = NULL;
+}
 
 Esp8266AT::Esp8266AT(Stream *stream, Stream *dbgStream) {
     this->_stream = stream;
@@ -16,42 +22,12 @@ Esp8266AT::Esp8266AT(Stream *stream, Stream *dbgStream) {
 
 boolean Esp8266AT::setup(String accessPoint, String password) {
 
-    if (!this->executeCommandAndWaitForResult(AT_WIFI_CONNECTION_MODE_STA, AT_RESPONSE_OK, true)) {
+    if (!this->_executeCommandAndWaitForResult(AT_WIFI_CONNECTION_MODE_STA, AT_RESPONSE_OK)) {
         return false;
     }
 
     String command = String(AT_AP_CONNECT) + "\"" + accessPoint + "\",\"" + password + "\"";
-    return this->executeCommandAndWaitForResult(command, AT_RESPONSE_OK, true);
-}
-
-boolean Esp8266AT::executeCommandAndWaitForResult(String command, String expectedResult, boolean prln) {
-    if (prln) {
-        this->_stream->println(command);
-    } else {
-        this->_stream->print(command);
-    }
-
-    if (this->_dbgStream) {
-        this->_dbgStream->print(command);
-    }
-
-    char expectedResultCharArray[expectedResult.length()];
-    expectedResult.toCharArray(expectedResultCharArray, expectedResult.length());
-
-    boolean result = this->_stream->find(expectedResultCharArray);
-
-    if (this->_dbgStream) {
-        this->_dbgStream->println(result ? ": OK" : ": Error");
-    }
-
-    this->_finishLastCommand();
-
-    return result;
-}
-
-void Esp8266AT::executeCommandAndIgnoreResult(String command) {
-    this->_stream->println(command);
-    this->_finishLastCommand();
+    return this->_executeCommandAndWaitForResult(command, AT_RESPONSE_OK, DELAY_FOR_WIFI_STARTUP);
 }
 
 boolean Esp8266AT::get(String ip, int port, String path) {
@@ -87,26 +63,70 @@ boolean Esp8266AT::post(String ip, int port, String path, String contentType, St
 }
 
 boolean Esp8266AT::_request(String ip, int port, String message, String expectedResponse) {
-    if (!this->executeCommandAndWaitForResult(SINGLE_CONNECTION_MODE, AT_RESPONSE_OK, true)) {
+    if (!this->_executeCommandAndWaitForResult(SINGLE_CONNECTION_MODE, AT_RESPONSE_OK)) {
         return false;
     }
 
     String startConnection = String(TCP_START_CONNECTION) + ",\"" + ip + "\"," + String(port);
-    if (!this->executeCommandAndWaitForResult(startConnection, AT_RESPONSE_OK, true)) {
+    if (!this->_executeCommandAndWaitForResult(startConnection, AT_RESPONSE_OK)) {
         return false;
     }
 
-    if (!this->executeCommandAndWaitForResult(
-            String(TCP_SEND_MESSAGE) + String(message.length()),
-            TCP_SEND_START_PROMPT, true)) {
-        this->executeCommandAndIgnoreResult(TCP_CLOSE_CONNECTION);
+    if (!this->_executeCommandAndWaitForResult(
+            String(TCP_SEND_MESSAGE) + String(message.length()), TCP_SEND_START_PROMPT)) {
+        this->_executeCommandAndIgnoreResult(TCP_CLOSE_CONNECTION, MAX_TIMEOUT_FOR_AT_COMMANDS);
         return false;
     }
 
-    boolean result = this->executeCommandAndWaitForResult(message, expectedResponse, false);
-    this->executeCommandAndIgnoreResult(TCP_CLOSE_CONNECTION);
+    boolean result = this->_executeCommandAndWaitForResult(message, expectedResponse, MAX_TIMEOUT_FOR_TCP_REQUEST, false, true);
+    //this->_executeCommandAndIgnoreResult(TCP_CLOSE_CONNECTION, MAX_TIMEOUT_FOR_AT_COMMANDS);
 
     return result;
+}
+
+boolean Esp8266AT::_executeCommandAndWaitForResult(String command, String expectedResult) {
+    this->_executeCommandAndWaitForResult(command, expectedResult, MAX_TIMEOUT_FOR_AT_COMMANDS);
+}
+
+boolean Esp8266AT::_executeCommandAndWaitForResult(String command, String expectedResult, unsigned int timeout) {
+    this->_executeCommandAndWaitForResult(command, expectedResult, timeout, true, false);
+}
+
+boolean Esp8266AT::_executeCommandAndWaitForResult(String command, String expectedResult, unsigned int timeout, boolean prln, boolean readWholeResult) {
+
+    this->_stream->print(command);
+
+    if (prln) {
+        this->_stream->println();
+    }
+
+    if (this->_dbgStream) {
+        this->_dbgStream->print(command);
+    }
+
+    String result = this->_readStringFromTheStream(timeout);
+
+    if (this->_dbgStream && result) {
+        this->_dbgStream->println(result);
+    }
+
+    return (result != NULL) && (result.indexOf(expectedResult) > -1);
+}
+
+void Esp8266AT::_executeCommandAndIgnoreResult(String command, unsigned int timeout) {
+
+    this->_stream->println(command);
+
+    String result = this->_readStringFromTheStream(timeout);
+
+    if (this->_dbgStream && result) {
+        this->_dbgStream->println(result);
+    }
+}
+
+String Esp8266AT::_readStringFromTheStream(unsigned int timeout) {
+    this->_stream->setTimeout(timeout);
+    return this->_stream->readString();
 }
 
 void Esp8266AT::_finishLastCommand() {

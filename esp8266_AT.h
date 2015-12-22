@@ -39,6 +39,10 @@
 #define HTTP_200_OK "HTTP/1.1 200 OK"
 #define HTTP_201_CREATED "HTTP/1.1 201 CREATED"
 
+#define MAX_TIMEOUT_FOR_AT_COMMANDS 500
+#define MAX_TIMEOUT_FOR_TCP_REQUEST 3000
+#define DELAY_FOR_WIFI_STARTUP 8000
+
 #include "Arduino.h"
 #include <Stream.h>
 
@@ -53,9 +57,8 @@ public:
      * stream - serial port connected to esp8266 chip
      * dbgStream - serial port for debug purposes
      */
-    Esp8266AT(Stream *stream, Stream *dbgStream = NULL);
-    boolean executeCommandAndWaitForResult(String command, String expectedResult, boolean prln);
-    void executeCommandAndIgnoreResult(String command);
+    Esp8266AT(Stream *stream);
+    Esp8266AT(Stream *stream, Stream *dbgStream);
     boolean setup(String accessPoint, String password);
 
     //HTTP methods emulation
@@ -64,7 +67,12 @@ public:
 private:
     Stream *_stream;
     Stream *_dbgStream;
+    boolean _executeCommandAndWaitForResult(String command, String expectedResult);
+    boolean _executeCommandAndWaitForResult(String command, String expectedResult, unsigned int timeout);
+    boolean _executeCommandAndWaitForResult(String command, String expectedResult, unsigned int timeout, boolean prln, boolean readWholeResult);
+    void _executeCommandAndIgnoreResult(String command, unsigned int timeout);
     boolean _request(String ip, int port, String message, String expectedResponse);
+    String _readStringFromTheStream(unsigned int timeout);
     void _finishLastCommand();
 };
 
