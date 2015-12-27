@@ -49,6 +49,8 @@ boolean Esp8266AT::_request(String ip, int port, String message, String expected
     if (this->_dbgStream) {
         this->_dbgStream->println();
         this->_dbgStream->println(result ? DBG_RESPONSE_OK : DBG_RESPONSE_ERROR);
+    } else {
+        delay(DBG_DEFAULT_DELAY);
     }
 
     return result;
@@ -83,6 +85,8 @@ boolean Esp8266AT::_executeCommandAndWaitForResult(String command, String expect
         this->_dbgStream->println();
         this->_dbgStream->println(DBG_COMMAND);
         this->_dbgStream->print(command);
+    } else {
+        delay(DBG_DEFAULT_DELAY);
     }
 
     this->_stream->print(command);
@@ -98,6 +102,8 @@ void Esp8266AT::_executeCommandAndIgnoreResult(String command, unsigned int time
     if (this->_dbgStream) {
         this->_dbgStream->println(DBG_COMMAND);
         this->_dbgStream->println(command);
+    } else {
+        delay(DBG_DEFAULT_DELAY);
     }
 
     this->_stream->print(command);

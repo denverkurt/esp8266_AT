@@ -44,6 +44,7 @@
 #define DELAY_FOR_WIFI_STARTUP 8000
 
 //debug messages
+#define DBG_DEFAULT_DELAY 15
 #define DBG_RESPONSE_OK "OK"
 #define DBG_RESPONSE_ERROR "Error"
 #define DBG_COMMAND "Command: "
