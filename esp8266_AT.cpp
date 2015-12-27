@@ -47,6 +47,7 @@ boolean Esp8266AT::_request(String ip, int port, String message, String expected
     //this->_executeCommandAndIgnoreResult(TCP_CLOSE_CONNECTION, MAX_TIMEOUT_FOR_AT_COMMANDS);
 
     if (this->_dbgStream) {
+        this->_dbgStream->println();
         this->_dbgStream->println(result ? DBG_RESPONSE_OK : DBG_RESPONSE_ERROR);
     }
 
@@ -79,8 +80,9 @@ boolean Esp8266AT::_executeCommandAndWaitForResult(String command, String expect
 boolean Esp8266AT::_executeCommandAndWaitForResult(String command, String expectedResult, unsigned int timeout) {
 
     if (this->_dbgStream) {
+        this->_dbgStream->println();
         this->_dbgStream->println(DBG_COMMAND);
-        this->_dbgStream->println(command);
+        this->_dbgStream->print(command);
     }
 
     this->_stream->print(command);
@@ -88,12 +90,6 @@ boolean Esp8266AT::_executeCommandAndWaitForResult(String command, String expect
     this->_stream->setTimeout(timeout);
     char expectedResultCharArray[expectedResult.length()];
     expectedResult.toCharArray(expectedResultCharArray, expectedResult.length());
-
-    if (this->_dbgStream) {
-        this->_dbgStream->println();
-        this->_dbgStream->print("_freeRam: ");
-        this->_dbgStream->println(this->freeRam());
-    }
 
     return this->_stream->find(expectedResultCharArray);
 }
@@ -112,11 +108,4 @@ void Esp8266AT::_executeCommandAndIgnoreResult(String command, unsigned int time
             this->_dbgStream->print(ch);
         }
     }
-}
-
-int Esp8266AT::freeRam ()
-{
-    extern int __heap_start, *__brkval;
-    int v;
-    return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }

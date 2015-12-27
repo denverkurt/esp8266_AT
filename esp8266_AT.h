@@ -76,7 +76,6 @@ private:
     void _executeCommandAndIgnoreResult(String command, unsigned int timeout);
     boolean _request(String ip, int port, String message, String expectedResponse);
     boolean _createTCPConnection(String ip, int port, int messageLength);
-    int freeRam ();
 };
 
 #endif
