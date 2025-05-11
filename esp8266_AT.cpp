@@ -76,7 +76,7 @@ boolean Esp8266AT::_createTCPConnection(String ip, int port, int messageLength) 
 }
 
 boolean Esp8266AT::_executeCommandAndWaitForResult(String command, String expectedResult) {
-    this->_executeCommandAndWaitForResult(command, expectedResult, MAX_TIMEOUT_FOR_AT_COMMANDS);
+    return this->_executeCommandAndWaitForResult(command, expectedResult, MAX_TIMEOUT_FOR_AT_COMMANDS);
 }
 
 boolean Esp8266AT::_executeCommandAndWaitForResult(String command, String expectedResult, unsigned int timeout) {
